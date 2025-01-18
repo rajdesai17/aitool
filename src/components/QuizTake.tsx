@@ -9,7 +9,7 @@ export const QuizTake = () => {
   const [loading, setLoading] = useState(true);
   const [quizData, setQuizData] = useState<any>(null);
 
-  useState(() => {
+  useEffect(() => {
     try {
       const data = localStorage.getItem(quizId || '');
       if (!data) {
@@ -49,7 +49,7 @@ export const QuizTake = () => {
       {error ? (
         <div className="text-red-500">{error}</div>
       ) : (
-        <Survey onComplete={handleQuizSubmit} initialData={quizData} />
+        <Survey onComplete={handleQuizSubmit} />
       )}
     </div>
   );

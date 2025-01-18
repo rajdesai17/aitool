@@ -17,3 +17,22 @@ export interface SurveyData {
     }>;
     personalityInsights: string;
   }
+
+  export interface AddressData {
+    fullName: string;
+    addressLine1: string;
+    addressLine2?: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  }
+
+  export interface QuizData {
+    id: string;
+    recipientEmail: string;
+    created: string;
+    completed: boolean;
+    surveyData?: SurveyData;
+    recommendations?: GiftRecommendation;
+  }
