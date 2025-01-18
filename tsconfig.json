@@ -1,4 +1,10 @@
 {
+  "compilerOptions": {
+    "noUnusedLocals": false,
+    "skipLibCheck": true,
+    "allowUnusedLabels": true,
+    "noUnusedParameters": false
+  },
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },

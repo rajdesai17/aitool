@@ -72,7 +72,7 @@ const questions = [
 
 export const Survey = ({ onComplete }: SurveyProps) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<SurveyFormData>({
+  const { register, handleSubmit, watch, setValue, formState: { errors:_errors } } = useForm<SurveyFormData>({
     resolver: zodResolver(surveySchema),
     defaultValues: {
       gender: 'male',

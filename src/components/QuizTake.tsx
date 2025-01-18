@@ -7,7 +7,7 @@ export const QuizTake = () => {
   const { quizId } = useParams();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [quizData, setQuizData] = useState<any>(null);
+  const [_quizData, setQuizData] = useState<any>(null);
 
   useEffect(() => {
     try {
