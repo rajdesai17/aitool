@@ -32,11 +32,6 @@ export const Survey = ({ onComplete }: { onComplete: (data: SurveyData) => void 
     setStep('quiz');
   };
 
-  const startQuiz = () => {
-    console.log("Starting quiz with demographics:", demographicData); // Debug log
-    setStep('quiz');
-  };
-
   const handleQuizAnswer = (answer: string) => {
     const newAnswers = [...quizAnswers, answer];
     setQuizAnswers(newAnswers);

@@ -4,7 +4,7 @@ import { GiftCard } from './GiftCard';
 import { predefinedGifts } from '../lib/constants';
 import { SurveyData, GiftRecommendation } from '../lib/types';
 
-export const Results = ({ surveyData, recommendations }: { 
+export const Results = ({ recommendations }: { 
   surveyData: SurveyData;
   recommendations: GiftRecommendation;
 }) => {

@@ -1,13 +1,8 @@
 // src/components/Chat.tsx
 import { useState } from 'react';
 import { getGeminiResponse } from '../lib/gemini';
-import { ChatContext } from '../lib/types';
+import { ChatContext, Message } from '../lib/types';  // Import the Message type from types
 import { MessageCircle, X } from 'lucide-react';
-
-interface Message {
-  role: string;
-  content: string;
-}
 
 export const Chat = ({ context }: { context: ChatContext }) => {
   const [messages, setMessages] = useState<Message[]>([
@@ -33,7 +28,11 @@ I've recommended some gifts based on their profile. Feel free to ask me:
     if (!content.trim() || isLoading) return;
     
     setIsLoading(true);
-    const newMessages = [...messages, { role: 'user', content }];
+    const newMessage: Message = {  // When creating new messages, ensure the role is strictly "user" or "assistant"
+      content,
+      role: "user"  // Must be exactly "user" or "assistant"
+    };
+    const newMessages = [...messages, newMessage];
     setMessages(newMessages);
     setInput('');
 

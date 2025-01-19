@@ -37,3 +37,8 @@ export interface AddressData {
   zipCode: string;
   country: string;
 }
+
+export interface Message {
+  content: string;
+  role: "user" | "assistant";  // Note: role must be strictly typed as union of literals
+}

@@ -2,9 +2,8 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { 
   SurveyData, 
   GiftRecommendation, 
-  GiftItem, 
-  ChatContext,
-  Message
+  GiftItem,
+  Message// Remove Message from here since it's not exported from types
 } from './types';
 import { predefinedGifts } from './constants';
 
