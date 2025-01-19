@@ -9,12 +9,6 @@ export const surveySchema = z.object({
 
 export type SurveyData = z.infer<typeof surveySchema>;
 
-export interface Gift {
-  name: string;
-  price: number;
-  category: string;
-}
-
 export interface GiftItem {
   name: string;
   reasoning: string;
@@ -32,6 +26,12 @@ export interface ChatContext {
   recommendations: GiftRecommendation;
 }
 
-export interface GiftImages {
-  [key: string]: string;
+export interface AddressData {
+  fullName: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
 }

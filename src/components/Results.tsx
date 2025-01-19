@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle as ChatIcon } from 'lucide-react';
 import { Chat } from './Chat';
 import { GiftCard } from './GiftCard';
-import { SurveyData, GiftRecommendation } from '../lib/types';
 import { predefinedGifts } from '../lib/constants';
+import { SurveyData, GiftRecommendation } from '../lib/types';
 
 export const Results = ({ surveyData, recommendations }: { 
   surveyData: SurveyData;
@@ -13,7 +13,6 @@ export const Results = ({ surveyData, recommendations }: {
   const [showChat, setShowChat] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [priceFilter, setPriceFilter] = useState<string>('All');
-  const [error, setError] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -25,37 +24,17 @@ export const Results = ({ surveyData, recommendations }: {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Use recommendations or fallback to predefined gifts
   const gifts = recommendations?.topGifts?.length > 0 
     ? recommendations.topGifts 
     : predefinedGifts;
-
-  if (error) {
-    return (
-      <div className="text-center p-8">
-        <p className="text-red-500">{error}</p>
-        <button 
-          onClick={() => window.location.reload()}
-          className="mt-4 text-blue-500 underline"
-        >
-          Try Again
-        </button>
-      </div>
-    );
-  }
 
   const categories = ['All', ...new Set(gifts.map(gift => gift.category))];
   const priceRanges = ['All', ...new Set(gifts.map(gift => gift.priceRange))];
 
   const filteredGifts = gifts.filter(gift => {
-    try {
-      const matchesCategory = selectedCategory === 'All' || gift.category === selectedCategory;
-      const matchesPrice = priceFilter === 'All' || gift.priceRange === priceFilter;
-      return matchesCategory && matchesPrice;
-    } catch (err) {
-      console.error('Error filtering gifts:', err);
-      return false;
-    }
+    const matchesCategory = selectedCategory === 'All' || gift.category === selectedCategory;
+    const matchesPrice = priceFilter === 'All' || gift.priceRange === priceFilter;
+    return matchesCategory && matchesPrice;
   });
 
   return (

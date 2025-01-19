@@ -7,7 +7,12 @@ import { motion } from 'framer-motion';
 
 export const Survey = ({ onComplete }: { onComplete: (data: SurveyData) => void }) => {
   const [step, setStep] = useState<'demographics' | 'pre-quiz' | 'quiz'>('demographics');
-  const [demographicData, setDemographicData] = useState<Partial<SurveyData>>();
+  const [demographicData, setDemographicData] = useState<SurveyData>({
+    gender: '',
+    ageRange: '',
+    relationship: '',
+    quizAnswers: []
+  });
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [quizAnswers, setQuizAnswers] = useState<string[]>([]);
 

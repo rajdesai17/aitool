@@ -1,5 +1,10 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { SurveyData, GiftRecommendation } from './types';
+import { 
+  SurveyData, 
+  GiftRecommendation, 
+  GiftItem, 
+  ChatContext 
+} from './types';
 import { predefinedGifts } from './constants';
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
@@ -7,7 +12,7 @@ const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 export async function getGiftRecommendations(surveyData: SurveyData): Promise<GiftRecommendation> {
   const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-  const prompt = `Based on the following user profile and quiz answers, recommend 5 gifts from the predefined list:
+  const prompt = `Based on the following user profile and quiz answers,You are a gift recommendation assistant. Use this context for your responses:
 
 Profile:
 - Gender: ${surveyData.gender}
@@ -39,7 +44,7 @@ Choose only 5 most suitable gifts considering their personality traits shown in 
     const parsed = JSON.parse(text);
 
     // Validate response matches predefined gifts
-    const validGifts = parsed.topGifts.filter(gift => 
+    const validGifts = parsed.topGifts.filter((gift: GiftItem) => 
       predefinedGifts.some(pg => pg.name === gift.name)
     ).slice(0, 5);
 
@@ -57,37 +62,21 @@ Choose only 5 most suitable gifts considering their personality traits shown in 
   }
 }
 
-interface Message {
-  role: string;
-  content: string;
-}
-
-export async function getGeminiResponse(messages: Message[], context: any) {
+export async function getGeminiResponse(context: ChatContext): Promise<string> {
   const model = genAI.getGenerativeModel({ model: "gemini-pro" });
   
-  const prompt = `You are a gift recommendation assistant. Use this context for your responses:
+  const prompt = `You are a gift recommendation assistant. Use this context:
   
-Recipient Profile:
+Profile:
 - Gender: ${context.surveyData.gender}
 - Age: ${context.surveyData.ageRange}
 - Relationship: ${context.surveyData.relationship}
 
-Recommended Gifts:
-${context.recommendations.topGifts.map(g => `- ${g.name} (${g.category}, ${g.priceRange})`).join('\n')}
+Gifts:
+${context.recommendations.topGifts.map((g: GiftItem) => 
+  `- ${g.name} (${g.category}, ${g.priceRange})`
+).join('\n')}`;
 
-Personality Insights:
-${context.recommendations.personalityInsights}
-
-Chat History:
-${messages.map(m => `${m.role}: ${m.content}`).join('\n')}
-
-Provide helpful gift advice based on this context. Keep responses concise and specific to the available gifts.`;
-
-  try {
-    const result = await model.generateContent(prompt);
-    return result.response.text();
-  } catch (error) {
-    console.error('Chat error:', error);
-    throw new Error('Failed to get response');
-  }
+  const result = await model.generateContent(prompt);
+  return result.response.text();
 }

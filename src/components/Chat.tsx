@@ -1,12 +1,7 @@
 // src/components/Chat.tsx
 import { useState } from 'react';
 import { getGeminiResponse } from '../lib/gemini';
-import { SurveyData, GiftRecommendation } from '../lib/types';
-
-interface ChatContext {
-  surveyData: SurveyData;
-  recommendations: GiftRecommendation;
-}
+import { ChatContext } from '../lib/types';
 
 interface Message {
   role: string;
@@ -27,7 +22,7 @@ export const Chat = ({ onClose, context }: { onClose: () => void; context: ChatC
     setInput('');
 
     try {
-      const response = await getGeminiResponse(newMessages, context);
+      const response = await getGeminiResponse(context);
       setMessages([...newMessages, { role: 'assistant', content: response }]);
     } catch (error) {
       console.error('Chat error:', error);
