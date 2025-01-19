@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { SurveyData, surveySchema } from '../lib/types';
 import { questions } from '../lib/surveyQuestions';
 import { motion } from 'framer-motion';
-import { Heart } from 'lucide-react';
+import { Heart, Share2, Copy, Check } from 'lucide-react';
 
 export const Survey = ({ onComplete }: { onComplete: (data: SurveyData) => void }) => {
   const [step, setStep] = useState<'demographics' | 'quiz'>('demographics');
@@ -21,6 +21,7 @@ export const Survey = ({ onComplete }: { onComplete: (data: SurveyData) => void 
   const [quizAnswers, setQuizAnswers] = useState<string[]>([]);
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<SurveyData>({
     resolver: zodResolver(surveySchema)
@@ -54,6 +55,17 @@ export const Survey = ({ onComplete }: { onComplete: (data: SurveyData) => void 
       });
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleShareQuiz = async () => {
+    const quizLink = `${window.location.origin}/share-quiz`;
+    try {
+      await navigator.clipboard.writeText(quizLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy link:', err);
     }
   };
 
@@ -168,6 +180,36 @@ export const Survey = ({ onComplete }: { onComplete: (data: SurveyData) => void 
             Continue to Quiz
           </button>
         </form>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-8 p-6 bg-gradient-to-r from-pink-50 to-pink-100 rounded-xl border border-pink-200 shadow-sm"
+        >
+          <h3 className="text-xl font-semibold text-pink-800 mb-4 flex items-center gap-2">
+            <Share2 className="w-5 h-5" />
+            Share Quiz with Someone
+          </h3>
+          <p className="text-gray-700 mb-4">
+            Want to know what gift someone else would like? Share this quiz with them!
+          </p>
+          <button
+            onClick={handleShareQuiz}
+            className="flex items-center justify-center gap-2 w-full bg-white text-pink-600 border border-pink-200 py-3 px-4 rounded-lg hover:bg-pink-50 transition-colors duration-200"
+          >
+            {copied ? (
+              <>
+                <Check className="w-4 h-4" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <Copy className="w-4 h-4" />
+                Copy Quiz Link
+              </>
+            )}
+          </button>
+        </motion.div>
       </motion.div>
     );
   }

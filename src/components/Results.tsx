@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { GiftCard } from './GiftCard';
+import { AddressForm } from './AddressForm';
 import { predefinedGifts } from '../lib/constants';
-import { SurveyData, GiftRecommendation } from '../lib/types';
+import { SurveyData, GiftRecommendation, AddressData } from '../lib/types';
 
 export const Results = ({ recommendations }: { 
   surveyData: SurveyData;
@@ -82,6 +83,26 @@ export const Results = ({ recommendations }: {
             </p>
           )}
         </motion.div>
+
+        {/* Shipping Details Section */}
+        <div className="mt-8 pt-8 border-t border-pink-200">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-6 bg-gradient-to-r from-pink-50 to-pink-100 rounded-xl border border-pink-200 shadow-sm"
+          >
+            <h2 className="text-2xl font-bold mb-4 text-pink-800">Shipping Details</h2>
+            <AddressForm 
+              onSubmit={async (addressData: AddressData) => {
+                try {
+                  console.log('Address submitted:', addressData);
+                } catch (error) {
+                  console.error('Error saving address:', error);
+                }
+              }} 
+            />
+          </motion.div>
+        </div>
       </motion.div>
     </div>
   );

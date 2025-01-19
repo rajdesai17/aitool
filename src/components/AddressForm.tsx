@@ -39,7 +39,7 @@ export const AddressForm = ({ onSubmit }: AddressFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="max-w-2xl mx-auto p-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <h2 className="text-2xl font-bold mb-6">Shipping Details</h2>
       
       <div className="space-y-4">
@@ -47,7 +47,7 @@ export const AddressForm = ({ onSubmit }: AddressFormProps) => {
           <label className="block mb-1">Full Name</label>
           <input
             {...register('fullName')}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 bg-white/90"
             placeholder="John Doe"
           />
           {errors.fullName && (
@@ -59,7 +59,7 @@ export const AddressForm = ({ onSubmit }: AddressFormProps) => {
           <label className="block mb-1">Address Line 1</label>
           <input
             {...register('addressLine1')}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 bg-white/90"
             placeholder="123 Main St"
           />
           {errors.addressLine1 && (
@@ -71,7 +71,7 @@ export const AddressForm = ({ onSubmit }: AddressFormProps) => {
           <label className="block mb-1">Address Line 2 (Optional)</label>
           <input
             {...register('addressLine2')}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 bg-white/90"
             placeholder="Apt 4B"
           />
         </div>
@@ -81,7 +81,7 @@ export const AddressForm = ({ onSubmit }: AddressFormProps) => {
             <label className="block mb-1">City</label>
             <input
               {...register('city')}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 bg-white/90"
             />
             {errors.city && (
               <p className="text-red-500 text-sm mt-1">{errors.city.message}</p>
@@ -92,7 +92,7 @@ export const AddressForm = ({ onSubmit }: AddressFormProps) => {
             <label className="block mb-1">State</label>
             <input
               {...register('state')}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 bg-white/90"
             />
             {errors.state && (
               <p className="text-red-500 text-sm mt-1">{errors.state.message}</p>
@@ -105,7 +105,7 @@ export const AddressForm = ({ onSubmit }: AddressFormProps) => {
             <label className="block mb-1">ZIP Code</label>
             <input
               {...register('zipCode')}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 bg-white/90"
               placeholder="12345"
             />
             {errors.zipCode && (
@@ -117,7 +117,7 @@ export const AddressForm = ({ onSubmit }: AddressFormProps) => {
             <label className="block mb-1">Country</label>
             <input
               {...register('country')}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-300 focus:border-pink-300 bg-white/90"
             />
             {errors.country && (
               <p className="text-red-500 text-sm mt-1">{errors.country.message}</p>
@@ -129,9 +129,9 @@ export const AddressForm = ({ onSubmit }: AddressFormProps) => {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mt-6 w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:opacity-50"
+        className="w-full bg-gradient-to-r from-pink-500 to-pink-600 text-white py-2 px-4 rounded-lg hover:from-pink-600 hover:to-pink-700 transition-all duration-200 shadow-md"
       >
-        {isSubmitting ? 'Saving...' : 'Save Address'}
+        {isSubmitting ? 'Saving...' : 'Save Shipping Details'}
       </button>
     </form>
   );
