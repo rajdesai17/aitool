@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { Survey } from './components/Survey';
 import { Results } from './components/Results';
-import { QuizGenerator } from './components/QuizGenerator';
-import { AddressForm } from './components/AddressForm';
-import { SurveyData, AddressData, GiftRecommendation } from './lib/types';
+import { SurveyData, GiftRecommendation } from './lib/types';
 import { Navbar } from './components/Navbar';
 import { getGiftRecommendations } from './lib/gemini';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -13,11 +11,9 @@ export default function App() {
   const [step, setStep] = useState<'survey' | 'results' | 'quiz' | 'address'>('survey');
   const [surveyData, setSurveyData] = useState<SurveyData | null>(null);
   const [recommendations, setRecommendations] = useState<GiftRecommendation | null>(null);
-  const [loading, setLoading] = useState(false);
 
   const handleSurveyComplete = async (data: SurveyData) => {
     try {
-      setLoading(true);
       setSurveyData(data);
       const results = await getGiftRecommendations(data);
       if (results) {
@@ -26,17 +22,6 @@ export default function App() {
       }
     } catch (error) {
       console.error('Error getting recommendations:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddressSubmit = async (data: AddressData) => {
-    try {
-      console.log('Address saved:', data);
-      setStep('survey');
-    } catch (error) {
-      console.error('Error saving address:', error);
     }
   };
 
