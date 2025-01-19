@@ -4,6 +4,8 @@ export const surveySchema = z.object({
   gender: z.string().min(1, "Please select a gender"),
   ageRange: z.string().min(1, "Please select an age range"),
   relationship: z.string().min(1, "Please select a relationship"),
+  recipientName: z.string().min(1, "Recipient name is required"),
+  personality: z.string().optional(),
   quizAnswers: z.array(z.string()).optional()
 });
 
@@ -22,8 +24,8 @@ export interface GiftRecommendation {
 }
 
 export interface ChatContext {
-  surveyData: SurveyData;
   recommendations: GiftRecommendation;
+  surveyData: SurveyData;
 }
 
 export interface AddressData {

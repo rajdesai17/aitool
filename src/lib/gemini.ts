@@ -3,7 +3,8 @@ import {
   SurveyData, 
   GiftRecommendation, 
   GiftItem, 
-  ChatContext 
+  ChatContext,
+  Message
 } from './types';
 import { predefinedGifts } from './constants';
 
@@ -62,21 +63,37 @@ Choose only 5 most suitable gifts considering their personality traits shown in 
   }
 }
 
-export async function getGeminiResponse(context: ChatContext): Promise<string> {
+export const getGeminiResponse = async (
+  userMessage: string, 
+  context: {
+    recommendations: GiftRecommendation,
+    surveyData: SurveyData,
+    conversationHistory: Message[]
+  }
+) => {
   const model = genAI.getGenerativeModel({ model: "gemini-pro" });
   
-  const prompt = `You are a gift recommendation assistant. Use this context:
-  
-Profile:
-- Gender: ${context.surveyData.gender}
-- Age: ${context.surveyData.ageRange}
-- Relationship: ${context.surveyData.relationship}
+  const prompt = `
+    Context:
+    - Gender: ${context.surveyData.gender}
+    - Age Range: ${context.surveyData.ageRange}
+    - Relationship: ${context.surveyData.relationship}
+    - Recommended Gifts: ${JSON.stringify(context.recommendations.topGifts)}
+    
+    Previous Messages:
+    ${context.conversationHistory.map(m => `${m.role}: ${m.content}`).join('\n')}
+    
+    User Question: ${userMessage}
+    
+    You are a helpful gift recommendation assistant. Provide a natural and helpful response about the gift recommendations based on this context. Keep responses concise and focused on the gifts and user's preferences.
+  `;
 
-Gifts:
-${context.recommendations.topGifts.map((g: GiftItem) => 
-  `- ${g.name} (${g.category}, ${g.priceRange})`
-).join('\n')}`;
-
-  const result = await model.generateContent(prompt);
-  return result.response.text();
-}
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
+  } catch (error) {
+    console.error('Gemini API error:', error);
+    return 'Sorry, I encountered an error. Please try again.';
+  }
+};

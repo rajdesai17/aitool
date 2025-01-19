@@ -24,7 +24,7 @@ export const HeroSection = () => {
               delay: Math.random() * 10
             }}
           >
-            <Heart className="w-8 h-8 text-pink-400" />
+            <Heart className="w-8 h-8 text-pink-900" />
           </motion.div>
         ))}
       </div>
@@ -46,7 +46,7 @@ export const HeroSection = () => {
             Find Your Perfect Gift
           </motion.h1>
           <motion.p 
-            className="text-xl md:text-2xl text-gray-300 mb-12"
+            className="text-xl font-bold md:text-2xl text-gray-500 mb-12"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}

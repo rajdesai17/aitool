@@ -72,6 +72,11 @@ select {
   50% { filter: drop-shadow(0 0 1rem #EC4899); }
 }
 
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
 /* Update form elements for light theme */
 select, input {
   @apply bg-white border-pink-200 text-gray-800 focus:border-pink-500 focus:ring-pink-500;

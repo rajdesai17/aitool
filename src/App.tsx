@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Survey } from './components/Survey';
 import { Results } from './components/Results';
+import { Chat } from './components/Chat'; // Add this import
 import { SurveyData, GiftRecommendation } from './lib/types';
 import { Navbar } from './components/Navbar';
 import { getGiftRecommendations } from './lib/gemini';
@@ -50,6 +51,10 @@ export default function App() {
             } 
           />
         </Routes>
+        {/* Single global chat component */}
+        {surveyData && recommendations && (
+          <Chat context={{ recommendations, surveyData }} />
+        )}
       </div>
     </Router>
   );
