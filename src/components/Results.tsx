@@ -1,123 +1,150 @@
-// src/components/Results.tsx
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { MessageCircle, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MessageCircle as ChatIcon } from 'lucide-react';
 import { Chat } from './Chat';
+import { GiftCard } from './GiftCard';
 import { SurveyData, GiftRecommendation } from '../lib/types';
+import { predefinedGifts } from '../lib/constants';
 
-const giftImages: Record<string, string> = {
-  "Smart Watch": "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=500",
-  "Premium Wireless Earbuds": "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500",
-  "Fitness Tracker": "https://images.unsplash.com/photo-1557858310-9052820906f7?w=500",
-  "Yoga Mat Set": "https://images.unsplash.com/photo-1601925260368-ae2f83cf1b1f?w=500",
-  "Digital Drawing Tablet": "https://images.unsplash.com/photo-1561886318-56cb73f7c6a9?w=500",
-  "Professional Camera": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500",
-  "Online Course Subscription": "https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=500",
-  "Gaming Console": "https://images.unsplash.com/photo-1486401899868-0e435ed85128?w=500",
-  "Hiking Backpack": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500",
-  "Premium Coffee Maker": "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=500",
-  "Smart Home Starter Kit": "https://images.unsplash.com/photo-1558002038-1055907df827?w=500",
-  "Premium Headphones": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500",
-  "E-reader": "https://images.unsplash.com/photo-1592496001020-d31bd830651f?w=500",
-  "Meditation App Subscription": "https://images.unsplash.com/photo-1508672019048-805c876b67e2?w=500",
-  "Language Learning Subscription": "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=500"
-};
-
-export const Results = ({ 
-  surveyData, 
-  recommendations 
-}: { 
+export const Results = ({ surveyData, recommendations }: { 
   surveyData: SurveyData;
   recommendations: GiftRecommendation;
 }) => {
   const [showChat, setShowChat] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [priceFilter, setPriceFilter] = useState<string>('All');
+  const [error, setError] = useState<string | null>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  if (!recommendations) {
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 100);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Use recommendations or fallback to predefined gifts
+  const gifts = recommendations?.topGifts?.length > 0 
+    ? recommendations.topGifts 
+    : predefinedGifts;
+
+  if (error) {
     return (
-      <div className="text-center text-gray-600">
-        No recommendations available. Please try again.
+      <div className="text-center p-8">
+        <p className="text-red-500">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-4 text-blue-500 underline"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
 
-  return (
-    <div className="max-w-4xl mx-auto p-4 pt-20">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8 bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg"
-      >
-        <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-pink-500 to-violet-500 text-transparent bg-clip-text">
-          Your Perfect Match
-        </h2>
-        <p className="text-gray-600 leading-relaxed">
-          {recommendations.personalityInsights}
-        </p>
-      </motion.div>
+  const categories = ['All', ...new Set(gifts.map(gift => gift.category))];
+  const priceRanges = ['All', ...new Set(gifts.map(gift => gift.priceRange))];
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {recommendations.topGifts.map((gift, index) => (
-          <motion.div
-            key={gift.name}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.1 }}
-            className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
+  const filteredGifts = gifts.filter(gift => {
+    try {
+      const matchesCategory = selectedCategory === 'All' || gift.category === selectedCategory;
+      const matchesPrice = priceFilter === 'All' || gift.priceRange === priceFilter;
+      return matchesCategory && matchesPrice;
+    } catch (err) {
+      console.error('Error filtering gifts:', err);
+      return false;
+    }
+  });
+
+  return (
+    <>
+      <div className="max-w-4xl mx-auto p-4 pt-20">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg"
+        >
+          {/* Personality Insights Section */}
+          <div className="mb-8 p-6 bg-gradient-to-r from-pink-50 to-violet-50 rounded-xl">
+            <h2 className="text-2xl font-bold mb-4">Your Gift Profile</h2>
+            <p className="text-gray-700 leading-relaxed">
+              {recommendations.personalityInsights || 
+              "Based on your answers, we've curated a selection of gifts that match your preferences."}
+            </p>
+          </div>
+
+          <h2 className="text-2xl font-bold mb-4">Recommended Gifts</h2>
+          
+          {/* Existing filters section */}
+          <div className="flex gap-4 mb-6">
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="p-2 border rounded"
+            >
+              {categories.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+
+            <select
+              value={priceFilter}
+              onChange={(e) => setPriceFilter(e.target.value)}
+              className="p-2 border rounded"
+            >
+              {priceRanges.map(price => (
+                <option key={price} value={price}>{price}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Gift Grid with Motion */}
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ staggerChildren: 0.1 }}
           >
-            <div className="h-48 bg-gray-200 relative overflow-hidden">
-              <img
-                src={giftImages[gift.name] || 'https://via.placeholder.com/400x300'}
-                alt={gift.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-              <h3 className="absolute bottom-4 left-4 text-white font-bold text-xl">
-                {gift.name}
-              </h3>
-            </div>
-            <div className="p-4">
-              <p className="text-gray-600 leading-relaxed">{gift.reasoning}</p>
-            </div>
+            {filteredGifts.length > 0 ? (
+              filteredGifts.map((gift, index) => (
+                <GiftCard key={`${gift.name}-${index}`} gift={gift} />
+              ))
+            ) : (
+              <p className="col-span-full text-center text-gray-500">
+                No gifts match the selected filters
+              </p>
+            )}
           </motion.div>
-        ))}
+        </motion.div>
       </div>
 
-      {/* Chatbot Trigger */}
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setShowChat(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-pink-500 to-violet-500 rounded-full shadow-lg flex items-center justify-center"
-      >
-        <MessageCircle className="w-6 h-6 text-white" />
-      </motion.button>
-
-      {/* Chat Dialog */}
-      {showChat && (
-        <div className="fixed inset-0 bg-black/50 flex items-end justify-end p-4 z-50">
-          <motion.div
-            initial={{ x: 300 }}
-            animate={{ x: 0 }}
-            exit={{ x: 300 }}
-            className="w-full max-w-md h-[600px] bg-white rounded-2xl shadow-2xl overflow-hidden"
+      <AnimatePresence>
+        {isScrolled && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            onClick={() => setShowChat(true)}
+            className="fixed bottom-4 right-4 bg-gradient-to-r from-pink-500 to-violet-500 text-white p-4 rounded-full shadow-lg hover:opacity-90 transition-all z-50"
+            aria-label="Open chat"
           >
-            <div className="h-full flex flex-col">
-              <div className="p-4 border-b flex items-center justify-between bg-gradient-to-r from-pink-500 to-violet-500">
-                <h3 className="text-white font-semibold">Need Help Deciding?</h3>
-                <button 
-                  onClick={() => setShowChat(false)}
-                  className="text-white hover:bg-white/20 p-1 rounded-full"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <Chat surveyData={surveyData} recommendations={recommendations} />
-              </div>
-            </div>
-          </motion.div>
+            <ChatIcon className="w-6 h-6" />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {showChat && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-4 max-w-2xl w-full mx-4">
+            <Chat 
+              onClose={() => setShowChat(false)} 
+              context={{ surveyData, recommendations }} 
+            />
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 };

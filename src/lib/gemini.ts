@@ -1,66 +1,93 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { SurveyData, Gift, GiftRecommendation } from './types';
+import { SurveyData, GiftRecommendation } from './types';
+import { predefinedGifts } from './constants';
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
-const predefinedGifts: Gift[] = [
-  { name: "Smart Watch", price: 199.99, category: "Tech" },
-  { name: "Premium Wireless Earbuds", price: 149.99, category: "Tech" },
-  { name: "Fitness Tracker", price: 89.99, category: "Health" },
-  { name: "Yoga Mat Set", price: 49.99, category: "Health" },
-  { name: "Digital Drawing Tablet", price: 199.99, category: "Creative" },
-  { name: "Professional Camera", price: 599.99, category: "Tech" },
-  { name: "Online Course Subscription", price: 199.99, category: "Education" },
-  { name: "Gaming Console", price: 399.99, category: "Entertainment" },
-  { name: "Hiking Backpack", price: 129.99, category: "Outdoor" },
-  { name: "Premium Coffee Maker", price: 149.99, category: "Home" },
-  { name: "Smart Home Starter Kit", price: 249.99, category: "Tech" },
-  { name: "Premium Headphones", price: 299.99, category: "Tech" },
-  { name: "E-reader", price: 139.99, category: "Tech" },
-  { name: "Meditation App Subscription", price: 79.99, category: "Health" },
-  { name: "Language Learning Subscription", price: 159.99, category: "Education" }
-];
+export async function getGiftRecommendations(surveyData: SurveyData): Promise<GiftRecommendation> {
+  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-export async function getGiftRecommendations(surveyData: SurveyData): Promise<GiftRecommendation | null> {
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    
-    const prompt = `As a gift recommendation expert, analyze these survey responses for a ${surveyData.gender} person:
+  const prompt = `Based on the following user profile and quiz answers, recommend 5 gifts from the predefined list:
 
-1. Activity Preference: ${surveyData.answers[0]}
-2. Lifestyle: ${surveyData.answers[1]}
-3. Free Time: ${surveyData.answers[2]}
-4. Budget Preference: ${surveyData.answers[3]}
-5. Gift Priority: ${surveyData.answers[4]}
+Profile:
+- Gender: ${surveyData.gender}
+- Age Range: ${surveyData.ageRange}
+- Relationship: ${surveyData.relationship}
+- Quiz Answers: ${JSON.stringify(surveyData.quizAnswers)}
 
-Based on these specific answers, analyze their personality traits and preferences.
-Then, rank the top 5 most suitable gifts from this list:
-${JSON.stringify(predefinedGifts, null, 2)}
+Available Gifts: ${JSON.stringify(predefinedGifts)}
 
-Consider:
-1. Their activity preferences and lifestyle
-2. Their budget preferences
-3. What they value most in a gift
-4. How they spend their free time
-
-Return the response in this JSON format:
+Provide recommendations in this exact JSON format:
 {
   "topGifts": [
     {
-      "name": "string",
-      "reasoning": "detailed explanation of why this gift matches their profile"
+      "name": "Gift Name (must match exactly with predefined gifts)",
+      "reasoning": "Personalized explanation based on profile and quiz answers",
+      "category": "matching category from predefined gifts",
+      "priceRange": "matching price range from predefined gifts"
     }
   ],
-  "personalityInsights": "detailed analysis of their personality and preferences"
+  "personalityInsights": "Brief analysis of gift preferences based on quiz answers"
 }
 
-Ensure each reasoning specifically references their survey answers.`;
+Choose only 5 most suitable gifts considering their personality traits shown in quiz answers.`;
 
+  try {
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    return JSON.parse(response.text());
+    const text = response.text().replace(/```json|```JSON|```/g, '').trim();
+    const parsed = JSON.parse(text);
+
+    // Validate response matches predefined gifts
+    const validGifts = parsed.topGifts.filter(gift => 
+      predefinedGifts.some(pg => pg.name === gift.name)
+    ).slice(0, 5);
+
+    return {
+      topGifts: validGifts,
+      personalityInsights: parsed.personalityInsights
+    };
   } catch (error) {
     console.error('Error getting recommendations:', error);
-    return null;
+    // Fallback to top 5 predefined gifts
+    return {
+      topGifts: predefinedGifts.slice(0, 5),
+      personalityInsights: "Unable to generate personalized insights. Showing popular gift options."
+    };
+  }
+}
+
+interface Message {
+  role: string;
+  content: string;
+}
+
+export async function getGeminiResponse(messages: Message[], context: any) {
+  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+  
+  const prompt = `You are a gift recommendation assistant. Use this context for your responses:
+  
+Recipient Profile:
+- Gender: ${context.surveyData.gender}
+- Age: ${context.surveyData.ageRange}
+- Relationship: ${context.surveyData.relationship}
+
+Recommended Gifts:
+${context.recommendations.topGifts.map(g => `- ${g.name} (${g.category}, ${g.priceRange})`).join('\n')}
+
+Personality Insights:
+${context.recommendations.personalityInsights}
+
+Chat History:
+${messages.map(m => `${m.role}: ${m.content}`).join('\n')}
+
+Provide helpful gift advice based on this context. Keep responses concise and specific to the available gifts.`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  } catch (error) {
+    console.error('Chat error:', error);
+    throw new Error('Failed to get response');
   }
 }

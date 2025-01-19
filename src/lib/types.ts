@@ -1,38 +1,37 @@
-// src/lib/types.ts
-export interface SurveyData {
-    gender: 'male' | 'female' | 'other';
-    answers: string[];
-  }
-  
-  export interface Gift {
-    name: string;
-    price: number;
-    category: string;
-  }
-  
-  export interface GiftRecommendation {
-    topGifts: Array<{
-      name: string;
-      reasoning: string;
-    }>;
-    personalityInsights: string;
-  }
+import { z } from 'zod';
 
-  export interface AddressData {
-    fullName: string;
-    addressLine1: string;
-    addressLine2?: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  }
+export const surveySchema = z.object({
+  gender: z.string().min(1, "Please select a gender"),
+  ageRange: z.string().min(1, "Please select an age range"),
+  relationship: z.string().min(1, "Please select a relationship"),
+  quizAnswers: z.array(z.string()).optional()
+});
 
-  export interface QuizData {
-    id: string;
-    recipientEmail: string;
-    created: string;
-    completed: boolean;
-    surveyData?: SurveyData;
-    recommendations?: GiftRecommendation;
-  }
+export type SurveyData = z.infer<typeof surveySchema>;
+
+export interface Gift {
+  name: string;
+  price: number;
+  category: string;
+}
+
+export interface GiftItem {
+  name: string;
+  reasoning: string;
+  category: string;
+  priceRange: string;
+}
+
+export interface GiftRecommendation {
+  topGifts: GiftItem[];
+  personalityInsights: string;
+}
+
+export interface ChatContext {
+  surveyData: SurveyData;
+  recommendations: GiftRecommendation;
+}
+
+export interface GiftImages {
+  [key: string]: string;
+}

@@ -1,216 +1,189 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { SurveyData } from '../lib/types';
+import { SurveyData, surveySchema } from '../lib/types';
+import { questions } from '../lib/surveyQuestions';
 import { motion } from 'framer-motion';
-import { Heart, ChevronRight, ChevronLeft } from 'lucide-react';
 
-interface SurveyProps {
-  onComplete: (data: SurveyData) => void;
-}
-
-const surveySchema = z.object({
-  gender: z.enum(['male', 'female', 'other']),
-  answers: z.array(z.string().min(1, "Please select an option")).length(5)
-});
-
-type SurveyFormData = z.infer<typeof surveySchema>;
-
-const questions = [
-  {
-    question: "What type of activities do you enjoy most?",
-    options: [
-      "Technology and gadgets",
-      "Sports and fitness",
-      "Arts and creativity",
-      "Reading and learning",
-      "Outdoor adventures"
-    ]
-  },
-  {
-    question: "How would you describe your lifestyle?",
-    options: [
-      "Very active and energetic",
-      "Relaxed and laid-back",
-      "Busy and productive",
-      "Social and outgoing",
-      "Quiet and introspective"
-    ]
-  },
-  {
-    question: "What's your preferred way to spend free time?",
-    options: [
-      "Playing with tech gadgets",
-      "Exercise and sports",
-      "Creative hobbies",
-      "Learning new skills",
-      "Outdoor activities"
-    ]
-  },
-  {
-    question: "What's your budget preference for purchases?",
-    options: [
-      "Premium quality regardless of price",
-      "Mid-range but good value",
-      "Budget-friendly essentials",
-      "Occasional luxury items",
-      "Practical and durable items"
-    ]
-  },
-  {
-    question: "What matters most to you in a gift?",
-    options: [
-      "Latest technology",
-      "Health and wellness",
-      "Personal development",
-      "Entertainment value",
-      "Practical utility"
-    ]
-  }
-];
-
-export const Survey = ({ onComplete }: SurveyProps) => {
+export const Survey = ({ onComplete }: { onComplete: (data: SurveyData) => void }) => {
+  const [step, setStep] = useState<'demographics' | 'pre-quiz' | 'quiz'>('demographics');
+  const [demographicData, setDemographicData] = useState<Partial<SurveyData>>();
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const { register, handleSubmit, watch, setValue, formState: { errors:_errors } } = useForm<SurveyFormData>({
-    resolver: zodResolver(surveySchema),
-    defaultValues: {
-      gender: 'male',
-      answers: Array(questions.length).fill('')
-    }
+  const [quizAnswers, setQuizAnswers] = useState<string[]>([]);
+
+  const { register, handleSubmit, formState: { errors } } = useForm<SurveyData>({
+    resolver: zodResolver(surveySchema)
   });
 
-  const answers = watch('answers');
-
-  const handleOptionSelect = (option: string) => {
-    const newAnswers = [...answers];
-    newAnswers[currentQuestion] = option;
-    setValue('answers', newAnswers);
+  const handleDemographicSubmit = (data: SurveyData) => {
+    console.log("Demographics submitted:", data); // Debug log
+    setDemographicData(data);
+    setStep('pre-quiz');
   };
 
-  const handleNextQuestion = () => {
+  const startQuiz = () => {
+    console.log("Starting quiz with demographics:", demographicData); // Debug log
+    setStep('quiz');
+  };
+
+  const handleQuizAnswer = (answer: string) => {
+    const newAnswers = [...quizAnswers, answer];
+    setQuizAnswers(newAnswers);
+
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(prev => prev + 1);
+    } else {
+      onComplete({
+        ...demographicData!,
+        quizAnswers: newAnswers
+      });
     }
   };
 
-  const handlePreviousQuestion = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(prev => prev - 1);
-    }
-  };
-
-  const onSubmit = (data: SurveyFormData) => {
-    onComplete(data);
-  };
-
-  return (
-    <div className="max-w-2xl mx-auto p-4 pt-20">
+  if (step === 'demographics') {
+    return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg"
       >
-        <div className="mb-6">
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <motion.div 
-              className="bg-gradient-to-r from-pink-500 to-violet-500 h-2 rounded-full"
-              style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-              initial={{ width: 0 }}
-              animate={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-            />
-          </div>
-          <p className="text-sm text-gray-600 mt-2 flex items-center gap-2">
-            <Heart className="w-4 h-4 text-pink-500" />
-            Question {currentQuestion + 1} of {questions.length}
-          </p>
-        </div>
-        
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {currentQuestion === 0 && (
-            <div className="mb-4">
-              <label className="block mb-2">Select Gender</label>
+        <form onSubmit={handleSubmit(handleDemographicSubmit)} className="max-w-md mx-auto space-y-8">
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
+                Gender
+              </label>
               <select
+                id="gender"
                 {...register('gender')}
-                className="w-full p-2 border rounded"
+                className="mt-1 block w-full rounded-md border border-gray-300 p-2"
+                aria-describedby={errors.gender ? "gender-error" : undefined}
               >
+                <option value="">Select gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
                 <option value="other">Other</option>
               </select>
+              {errors.gender && (
+                <p id="gender-error" className="mt-1 text-sm text-red-600">
+                  Please select a gender
+                </p>
+              )}
             </div>
-          )}
 
-          <motion.div
-            key={currentQuestion}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="mb-6"
-          >
-            <h3 className="text-xl font-medium mb-4 text-gray-800">
-              {questions[currentQuestion].question}
-            </h3>
-            <div className="space-y-3">
-              {questions[currentQuestion].options.map((option, index) => (
-                <motion.button
-                  key={index}
-                  type="button"
-                  onClick={() => handleOptionSelect(option)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`w-full p-4 text-left rounded-xl border transition-all ${
-                    answers[currentQuestion] === option 
-                      ? 'bg-gradient-to-r from-pink-500 to-violet-500 text-white border-transparent'
-                      : 'bg-white hover:border-pink-200 border-gray-200'
-                  }`}
-                >
-                  {option}
-                </motion.button>
-              ))}
+            <div>
+              <label htmlFor="ageRange" className="block text-sm font-medium text-gray-700">
+                Age Range
+              </label>
+              <select
+                id="ageRange"
+                {...register('ageRange')}
+                className="mt-1 block w-full rounded-md border border-gray-300 p-2"
+                aria-describedby={errors.ageRange ? "age-error" : undefined}
+              >
+                <option value="">Select age range</option>
+                <option value="18-24">18-24</option>
+                <option value="25-34">25-34</option>
+                <option value="35-44">35-44</option>
+                <option value="45-54">45-54</option>
+                <option value="55-64">55-64</option>
+                <option value="65+">65+</option>
+              </select>
+              {errors.ageRange && (
+                <p id="age-error" className="mt-1 text-sm text-red-600">
+                  Please select an age range
+                </p>
+              )}
             </div>
-          </motion.div>
 
-          <div className="flex justify-between">
-            <motion.button
-              type="button"
-              onClick={handlePreviousQuestion}
-              disabled={currentQuestion === 0}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gray-500 text-white disabled:opacity-50"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Previous
-            </motion.button>
-
-            {currentQuestion < questions.length - 1 ? (
-              <motion.button
-                type="button"
-                onClick={handleNextQuestion}
-                disabled={!answers[currentQuestion]}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-violet-500 text-white disabled:opacity-50"
+            <div>
+              <label htmlFor="relationship" className="block text-sm font-medium text-gray-700">
+                Relationship to Recipient
+              </label>
+              <select
+                id="relationship"
+                {...register('relationship')}
+                className="mt-1 block w-full rounded-md border border-gray-300 p-2"
+                aria-describedby={errors.relationship ? "relationship-error" : undefined}
               >
-                Next
-                <ChevronRight className="w-4 h-4" />
-              </motion.button>
-            ) : (
-              <motion.button
-                type="submit"
-                disabled={!answers[currentQuestion]}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-violet-500 text-white disabled:opacity-50"
-              >
-                Find Matches
-                <Heart className="w-4 h-4" />
-              </motion.button>
-            )}
+                <option value="">Select relationship</option>
+                <option value="parent">Parent</option>
+                <option value="sibling">Sibling</option>
+                <option value="friend">Friend</option>
+                <option value="spouse/partner">Spouse/Partner</option>
+                <option value="child">Child</option>
+                <option value="other">Other</option>
+              </select>
+              {errors.relationship && (
+                <p id="relationship-error" className="mt-1 text-sm text-red-600">
+                  Please select your relationship
+                </p>
+              )}
+            </div>
           </div>
+
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-pink-500 to-violet-500 text-white py-2 px-4 rounded-md hover:opacity-90 transition-opacity"
+            aria-label="Continue to quiz"
+          >
+            Continue to Quiz
+          </button>
         </form>
       </motion.div>
-    </div>
+    );
+  }
+
+  if (step === 'pre-quiz') {
+    return (
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-md mx-auto text-center space-y-6"
+      >
+        <h2 className="text-2xl font-bold">Ready to Find the Perfect Gift?</h2>
+        <p className="text-gray-600">
+          You'll answer 25 questions to help us understand preferences and personality.
+          This will take about 5-10 minutes.
+        </p>
+        <button
+          onClick={startQuiz}
+          className="w-full bg-gradient-to-r from-pink-500 to-violet-500 text-white py-3 px-6 rounded-lg hover:opacity-90 transition-opacity"
+        >
+          Start Quiz
+        </button>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="space-y-6 max-w-2xl mx-auto"
+    >
+      <div className="text-center">
+        <h2 className="text-xl font-semibold mb-4">{questions[currentQuestion].question}</h2>
+        <div className="grid gap-4">
+          {questions[currentQuestion].options.map((option, index) => (
+            <button
+              key={index}
+              onClick={() => handleQuizAnswer(option.text)}
+              className="p-4 border rounded-lg hover:bg-gray-50 transition-colors text-left"
+            >
+              {option.text}
+            </button>
+          ))}
+        </div>
+        <div className="mt-6 flex items-center justify-between text-sm text-gray-500">
+          <span>Question {currentQuestion + 1} of {questions.length}</span>
+          <div className="w-48 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-pink-500 to-violet-500 transition-all duration-300"
+              style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+            />
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 };
