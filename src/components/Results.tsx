@@ -43,25 +43,25 @@ export const Results = ({ surveyData, recommendations }: {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8 bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg"
+          className="mb-8 bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-pink-200"
         >
           {/* Personality Insights Section */}
-          <div className="mb-8 p-6 bg-gradient-to-r from-pink-50 to-violet-50 rounded-xl">
-            <h2 className="text-2xl font-bold mb-4">Your Gift Profile</h2>
+          <div className="mb-8 p-6 bg-gradient-to-r from-pink-50 to-pink-100 rounded-xl border border-pink-200">
+            <h2 className="text-2xl font-bold mb-4 text-pink-800">Your Gift Profile</h2>
             <p className="text-gray-700 leading-relaxed">
               {recommendations.personalityInsights || 
               "Based on your answers, we've curated a selection of gifts that match your preferences."}
             </p>
           </div>
 
-          <h2 className="text-2xl font-bold mb-4">Recommended Gifts</h2>
+          <h2 className="text-2xl font-bold mb-4 text-pink-800">Recommended Gifts</h2>
           
           {/* Existing filters section */}
           <div className="flex gap-4 mb-6">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="p-2 border rounded"
+              className="p-2 border border-pink-200 rounded bg-white text-gray-800"
             >
               {categories.map(category => (
                 <option key={category} value={category}>{category}</option>
@@ -71,7 +71,7 @@ export const Results = ({ surveyData, recommendations }: {
             <select
               value={priceFilter}
               onChange={(e) => setPriceFilter(e.target.value)}
-              className="p-2 border rounded"
+              className="p-2 border border-pink-200 rounded bg-white text-gray-800"
             >
               {priceRanges.map(price => (
                 <option key={price} value={price}>{price}</option>

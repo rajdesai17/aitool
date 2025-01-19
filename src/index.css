@@ -1,3 +1,87 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  @apply bg-background text-gray-800;
+}
+
+select option {
+  @apply bg-white text-gray-800;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dark-select {
+  @apply bg-white text-gray-800 border-pink-200;
+}
+
+/* Add these new styles */
+select:focus {
+  @apply ring-2 ring-pink-500 border-pink-500;
+}
+
+option {
+  @apply bg-gray-800 text-gray-100 p-2;
+}
+
+/* Improve select dropdown visibility */
+select {
+  @apply appearance-none bg-no-repeat bg-right bg-white border-pink-200 text-gray-800;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23EC4899' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-size: 1.5em 1.5em;
+  cursor: pointer;
+}
+
+.hover-card {
+  @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white/80 backdrop-blur-sm border border-pink-200;
+}
+
+.hover-text {
+  @apply transition-colors duration-200 hover:text-pink-500;
+}
+
+.option-button {
+  @apply transition-all duration-200 hover:bg-pink-50 hover:border-pink-300 hover:shadow-md text-gray-800 bg-white;
+}
+
+.loading-pulse {
+  @apply animate-pulse-soft bg-primary-100 rounded-lg p-8 text-center;
+}
+
+.loading-heart {
+  @apply text-pink-500 animate-heartbeat animate-glow;
+  animation: heartbeat 1.5s ease-in-out infinite, glow 2s ease-in-out infinite;
+}
+
+/* Custom loading animation */
+.loading-container {
+  @apply flex items-center justify-center p-8;
+}
+
+/* Add these animations */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes glow {
+  0%, 100% { filter: drop-shadow(0 0 0.5rem #EC4899); }
+  50% { filter: drop-shadow(0 0 1rem #EC4899); }
+}
+
+/* Update form elements for light theme */
+select, input {
+  @apply bg-white border-pink-200 text-gray-800 focus:border-pink-500 focus:ring-pink-500;
+}
+
+select option:hover,
+select option:focus,
+select option:active,
+select option:checked {
+  background: linear-gradient(to right, #FCE7F3, #FDF2F8) !important;
+  background-color: #FCE7F3 !important;
+  color: #BE185D !important;
+}
